@@ -1,8 +1,9 @@
 // ============================================================
-// CONFIGURATION — change these two values only
+// CONFIGURATION — change these values only
 // ============================================================
-var PASSWORD = "MySecret123";   // <-- your password here
-var LOCK_SHEET_NAME = "🔒 LOCKED"; // name of the placeholder sheet shown when locked
+var PASSWORD = "MySecret123";       // <-- your password here
+var PROTECTED_SHEET = "marbella trip"; // exact name of the sheet to lock
+var LOCK_SHEET_NAME = "🔒 LOCKED";    // name of the placeholder shown when locked
 // ============================================================
 
 /**
@@ -15,31 +16,35 @@ function onOpen() {
 }
 
 /**
- * Hides all sheets except the lock placeholder.
- * Creates the placeholder if it doesn't exist.
+ * Hides the protected sheet and inserts a lock placeholder in its position.
+ * All other sheets are left untouched.
  */
 function lockSpreadsheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheets = ss.getSheets();
 
-  // Create the lock sheet if it doesn't exist
+  var targetSheet = ss.getSheetByName(PROTECTED_SHEET);
+  if (!targetSheet) return; // nothing to lock if the sheet doesn't exist
+
+  // Remember the tab position so the placeholder sits in the same spot
+  var sheetIndex = targetSheet.getIndex();
+
+  // Hide the real sheet
+  targetSheet.hideSheet();
+
+  // Create the lock placeholder at the same position (if not already there)
   var lockSheet = ss.getSheetByName(LOCK_SHEET_NAME);
   if (!lockSheet) {
-    lockSheet = ss.insertSheet(LOCK_SHEET_NAME, 0);
-    lockSheet.getRange("A1").setValue("🔒 This spreadsheet is password protected.");
+    lockSheet = ss.insertSheet(LOCK_SHEET_NAME, sheetIndex - 1);
+    lockSheet.getRange("A1").setValue("🔒 \"" + PROTECTED_SHEET + "\" is password protected.");
     lockSheet.getRange("A2").setValue("Please enter the password in the dialog box to continue.");
     lockSheet.getRange("A1:A2").setFontSize(14).setFontWeight("bold");
     lockSheet.setTabColor("#ff0000");
   }
 
-  // Show the lock sheet first so users land on it
-  ss.setActiveSheet(lockSheet);
-
-  // Hide every other sheet
-  for (var i = 0; i < sheets.length; i++) {
-    if (sheets[i].getName() !== LOCK_SHEET_NAME) {
-      sheets[i].hideSheet();
-    }
+  // Only redirect the user if they were on the protected sheet
+  if (ss.getActiveSheet().getName() === PROTECTED_SHEET ||
+      ss.getActiveSheet().getName() === LOCK_SHEET_NAME) {
+    ss.setActiveSheet(lockSheet);
   }
 }
 
@@ -68,25 +73,17 @@ function checkPassword(attempt) {
 }
 
 /**
- * Makes all hidden sheets visible again and removes the lock sheet.
+ * Unhides the protected sheet, removes the lock placeholder,
+ * and navigates the user to the protected sheet.
  */
 function unlockSpreadsheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheets = ss.getSheets();
 
-  // Unhide every real sheet
-  for (var i = 0; i < sheets.length; i++) {
-    if (sheets[i].getName() !== LOCK_SHEET_NAME) {
-      sheets[i].showSheet();
-    }
-  }
-
-  // Activate the first real sheet
-  for (var i = 0; i < sheets.length; i++) {
-    if (sheets[i].getName() !== LOCK_SHEET_NAME) {
-      ss.setActiveSheet(sheets[i]);
-      break;
-    }
+  // Unhide the real sheet
+  var targetSheet = ss.getSheetByName(PROTECTED_SHEET);
+  if (targetSheet) {
+    targetSheet.showSheet();
+    ss.setActiveSheet(targetSheet);
   }
 
   // Delete the lock placeholder
