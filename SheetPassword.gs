@@ -51,11 +51,8 @@ function lockSpreadsheet() {
     lockSheet.setTabColor("#ff0000");
   }
 
-  // Only redirect the user if they were on the protected sheet
-  if (ss.getActiveSheet().getName() === PROTECTED_SHEET ||
-      ss.getActiveSheet().getName() === LOCK_SHEET_NAME) {
-    ss.setActiveSheet(lockSheet);
-  }
+  // Always put the user on the lock placeholder
+  ss.setActiveSheet(lockSheet);
 }
 
 /**
