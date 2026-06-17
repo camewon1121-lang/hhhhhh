@@ -22,8 +22,18 @@ function onOpen() {
 function lockSpreadsheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
+  // Try exact match first, then case-insensitive fallback
   var targetSheet = ss.getSheetByName(PROTECTED_SHEET);
-  if (!targetSheet) return; // nothing to lock if the sheet doesn't exist
+  if (!targetSheet) {
+    var sheets = ss.getSheets();
+    for (var i = 0; i < sheets.length; i++) {
+      if (sheets[i].getName().toLowerCase().trim() === PROTECTED_SHEET.toLowerCase().trim()) {
+        targetSheet = sheets[i];
+        break;
+      }
+    }
+  }
+  if (!targetSheet) return;
 
   // Remember the tab position so the placeholder sits in the same spot
   var sheetIndex = targetSheet.getIndex();
@@ -49,13 +59,14 @@ function lockSpreadsheet() {
 }
 
 /**
- * Shows the password prompt as a sidebar — no X button, cannot be dismissed.
+ * Shows the password prompt as a modal dialog.
  */
 function showPasswordDialog() {
   var html = HtmlService.createHtmlOutput(getDialogHtml())
-    .setTitle("🔒 Password Required");
+    .setWidth(360)
+    .setHeight(240);
 
-  SpreadsheetApp.getUi().showSidebar(html);
+  SpreadsheetApp.getUi().showModalDialog(html, "🔒 Password Required");
 }
 
 /**
