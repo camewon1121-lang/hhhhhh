@@ -49,15 +49,13 @@ function lockSpreadsheet() {
 }
 
 /**
- * Shows the HTML password dialog. The dialog is modal — users
- * cannot click behind it or dismiss it with Escape.
+ * Shows the password prompt as a sidebar — no X button, cannot be dismissed.
  */
 function showPasswordDialog() {
   var html = HtmlService.createHtmlOutput(getDialogHtml())
-    .setWidth(360)
-    .setHeight(240);
+    .setTitle("🔒 Password Required");
 
-  SpreadsheetApp.getUi().showModalDialog(html, "🔒 Password Required");
+  SpreadsheetApp.getUi().showSidebar(html);
 }
 
 /**
@@ -101,15 +99,14 @@ function getDialogHtml() {
   var html = '<!DOCTYPE html>' +
     '<html><head><base target="_top"><style>' +
     '* { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }' +
-    'body { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f8f9fa; }' +
-    '.card { background: white; border-radius: 8px; padding: 32px; width: 100%; max-width: 320px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); text-align: center; }' +
-    'h2 { font-size: 20px; margin-bottom: 8px; color: #202124; }' +
-    'p { font-size: 13px; color: #5f6368; margin-bottom: 20px; }' +
+    'body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #f8f9fa; padding: 24px; }' +
+    'h2 { font-size: 18px; margin-bottom: 8px; color: #202124; text-align: center; }' +
+    'p { font-size: 13px; color: #5f6368; margin-bottom: 20px; text-align: center; }' +
     'input { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; outline: none; }' +
     'input:focus { border-color: #1a73e8; }' +
-    'button { margin-top: 16px; width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }' +
+    'button { margin-top: 12px; width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }' +
     'button:hover { background: #1557b0; }' +
-    '.error { color: #d93025; font-size: 13px; margin-top: 10px; display: none; }' +
+    '.error { color: #d93025; font-size: 13px; margin-top: 10px; display: none; text-align: center; }' +
     '.shake { animation: shake 0.4s; }' +
     '@keyframes shake {' +
     '  0%,100% { transform: translateX(0); }' +
@@ -119,9 +116,9 @@ function getDialogHtml() {
     '  80% { transform: translateX(6px); }' +
     '}' +
     '</style></head><body>' +
-    '<div class="card" id="card">' +
+    '<div id="card" style="width:100%">' +
     '<h2>🔒 Protected Sheet</h2>' +
-    '<p>Enter the password to access this sheet.</p>' +
+    '<p>Enter the password to access the Marbella Trip sheet.</p>' +
     '<input type="password" id="pwd" placeholder="Password" autofocus onkeydown="if(event.key===\'Enter\') submit()">' +
     '<button onclick="submit()">Unlock</button>' +
     '<div class="error" id="err">Incorrect password. Please try again.</div>' +
@@ -151,9 +148,6 @@ function getDialogHtml() {
     '    })' +
     '    .checkPassword(pwd);' +
     '}' +
-    'document.addEventListener("keydown", function(e) {' +
-    '  if (e.key === "Escape") e.preventDefault();' +
-    '});' +
     '<\/script></body></html>';
   return html;
 }
