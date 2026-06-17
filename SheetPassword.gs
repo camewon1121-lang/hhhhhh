@@ -148,6 +148,6 @@ function getDialogHtml() {
     '    })' +
     '    .checkPassword(pwd);' +
     '}' +
-    '<\/script></body></html>';
+    '</s' + 'cript></body></html>';
   return html;
 }
