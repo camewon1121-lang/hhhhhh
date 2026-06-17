@@ -98,75 +98,62 @@ function unlockSpreadsheet() {
  * The dialog re-shows itself on wrong password and cannot be closed.
  */
 function getDialogHtml() {
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <base target="_top">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    body { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f8f9fa; }
-    .card { background: white; border-radius: 8px; padding: 32px; width: 100%; max-width: 320px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); text-align: center; }
-    h2 { font-size: 20px; margin-bottom: 8px; color: #202124; }
-    p  { font-size: 13px; color: #5f6368; margin-bottom: 20px; }
-    input { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; outline: none; }
-    input:focus { border-color: #1a73e8; }
-    button { margin-top: 16px; width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }
-    button:hover { background: #1557b0; }
-    .error { color: #d93025; font-size: 13px; margin-top: 10px; display: none; }
-    .shake { animation: shake 0.4s; }
-    @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      20%      { transform: translateX(-8px); }
-      40%      { transform: translateX(8px); }
-      60%      { transform: translateX(-6px); }
-      80%      { transform: translateX(6px); }
-    }
-  </style>
-</head>
-<body>
-  <div class="card" id="card">
-    <h2>🔒 Protected Sheet</h2>
-    <p>Enter the password to access this spreadsheet.</p>
-    <input type="password" id="pwd" placeholder="Password" autofocus
-           onkeydown="if(event.key==='Enter') submit()">
-    <button onclick="submit()">Unlock</button>
-    <div class="error" id="err">Incorrect password. Please try again.</div>
-  </div>
-
-  <script>
-    function submit() {
-      var pwd = document.getElementById('pwd').value;
-      document.getElementById('err').style.display = 'none';
-
-      google.script.run
-        .withSuccessHandler(function(ok) {
-          if (ok) {
-            // Close the dialog on success
-            google.script.host.close();
-          } else {
-            // Wrong password — shake the card, clear input, show error
-            var card = document.getElementById('card');
-            var input = document.getElementById('pwd');
-            card.classList.remove('shake');
-            void card.offsetWidth; // force reflow to restart animation
-            card.classList.add('shake');
-            input.value = '';
-            input.focus();
-            document.getElementById('err').style.display = 'block';
-          }
-        })
-        .withFailureHandler(function(err) {
-          document.getElementById('err').textContent = 'Error: ' + err.message;
-          document.getElementById('err').style.display = 'block';
-        })
-        .checkPassword(pwd);
-    }
-
-    // Block the Escape key so the dialog cannot be dismissed
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') e.preventDefault();
-    });
-  </script>
-</body>
-</html>`;
+  var html = '<!DOCTYPE html>' +
+    '<html><head><base target="_top"><style>' +
+    '* { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }' +
+    'body { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f8f9fa; }' +
+    '.card { background: white; border-radius: 8px; padding: 32px; width: 100%; max-width: 320px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); text-align: center; }' +
+    'h2 { font-size: 20px; margin-bottom: 8px; color: #202124; }' +
+    'p { font-size: 13px; color: #5f6368; margin-bottom: 20px; }' +
+    'input { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; outline: none; }' +
+    'input:focus { border-color: #1a73e8; }' +
+    'button { margin-top: 16px; width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }' +
+    'button:hover { background: #1557b0; }' +
+    '.error { color: #d93025; font-size: 13px; margin-top: 10px; display: none; }' +
+    '.shake { animation: shake 0.4s; }' +
+    '@keyframes shake {' +
+    '  0%,100% { transform: translateX(0); }' +
+    '  20% { transform: translateX(-8px); }' +
+    '  40% { transform: translateX(8px); }' +
+    '  60% { transform: translateX(-6px); }' +
+    '  80% { transform: translateX(6px); }' +
+    '}' +
+    '</style></head><body>' +
+    '<div class="card" id="card">' +
+    '<h2>🔒 Protected Sheet</h2>' +
+    '<p>Enter the password to access this sheet.</p>' +
+    '<input type="password" id="pwd" placeholder="Password" autofocus onkeydown="if(event.key===\'Enter\') submit()">' +
+    '<button onclick="submit()">Unlock</button>' +
+    '<div class="error" id="err">Incorrect password. Please try again.</div>' +
+    '</div>' +
+    '<script>' +
+    'function submit() {' +
+    '  var pwd = document.getElementById("pwd").value;' +
+    '  document.getElementById("err").style.display = "none";' +
+    '  google.script.run' +
+    '    .withSuccessHandler(function(ok) {' +
+    '      if (ok) {' +
+    '        google.script.host.close();' +
+    '      } else {' +
+    '        var card = document.getElementById("card");' +
+    '        var input = document.getElementById("pwd");' +
+    '        card.classList.remove("shake");' +
+    '        void card.offsetWidth;' +
+    '        card.classList.add("shake");' +
+    '        input.value = "";' +
+    '        input.focus();' +
+    '        document.getElementById("err").style.display = "block";' +
+    '      }' +
+    '    })' +
+    '    .withFailureHandler(function(err) {' +
+    '      document.getElementById("err").textContent = "Error: " + err.message;' +
+    '      document.getElementById("err").style.display = "block";' +
+    '    })' +
+    '    .checkPassword(pwd);' +
+    '}' +
+    'document.addEventListener("keydown", function(e) {' +
+    '  if (e.key === "Escape") e.preventDefault();' +
+    '});' +
+    '<\/script></body></html>';
+  return html;
 }
